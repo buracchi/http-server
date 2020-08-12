@@ -6,7 +6,7 @@ project (
 	LANGUAGES C
 	)
 
-# Use C 11
+# Use C11
 set(CMAKE_C_STANDARD 11)
 # Require (at least) it
 set(CMAKE_C_STANDARD_REQUIRED ON)
