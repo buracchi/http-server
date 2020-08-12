@@ -1,0 +1,40 @@
+name: Ubuntu
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: configure
+      run: |
+        mkdir -p build
+        cd build
+        cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ..
+
+    - name: build
+      run: cmake --build build --config Debug -j $(nproc)
+
+    - name: test
+      working-directory: build
+      run: ctest -j $(nproc) --output-on-failure
+
+    - name: Codecov
+      uses: codecov/codecov-action@v1.0.12
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: true
