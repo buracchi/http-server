@@ -1,5 +1,4 @@
-add_executable(test_fib fib.c)
+add_executable(test_server server.c)
+target_link_libraries(test_server PRIVATE server)
 
-target_link_libraries(test_fib PRIVATE fib)
-
-add_test(NAME "Fib_Test" COMMAND "test_fib")
+add_test(NAME "Hello_Test" COMMAND "test_server")
