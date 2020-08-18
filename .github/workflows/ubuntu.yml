@@ -20,6 +20,23 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
+    - name: Cache Primes
+      id: cache-primes
+      uses: actions/cache@v2
+      with:
+        path: prime-numbers
+        key: ${{ runner.os }}-primes
+
+    - name: Cache vcpkg
+      uses: actions/cache@v2.1.0
+      with:
+        # A list of files, directories, and wildcard patterns to cache and restore
+        path: vcpkg
+        # An explicit key for restoring and saving the cache
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/*.a*') }}
+        # An ordered list of keys to use for restoring the cache if no cache hit occurred for key
+        restore-keys: ${{ runner.os }}-vcpkg-
+
     - name: install vcpkg
       run: |
         git clone https://github.com/microsoft/vcpkg
