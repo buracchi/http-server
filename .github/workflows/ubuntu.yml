@@ -28,11 +28,13 @@ jobs:
         restore-keys: ${{ runner.os }}-vcpkg-
 
     - name: install vcpkg
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/microsoft/vcpkg
         ./vcpkg/bootstrap-vcpkg.sh
 
     - name: install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
       run: ./vcpkg/vcpkg install libjpeg-turbo
 
     - name: configure
