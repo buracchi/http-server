@@ -20,6 +20,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
+    - name: install vcpkg
+      run: |
+        git clone https://github.com/microsoft/vcpkg
+        ./vcpkg/bootstrap-vcpkg.sh
+
+    - name: install dependencies
+      run: ./vcpkg/vcpkg install libjpeg-turbo
+
     - name: configure
       run: |
         mkdir -p build

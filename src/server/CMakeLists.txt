@@ -7,5 +7,6 @@ add_library(
 	)
 
 target_include_directories(server PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(server PRIVATE image)
 target_compile_options(server PUBLIC -Wall -pedantic)
 target_link_libraries(server PUBLIC coverage_config)

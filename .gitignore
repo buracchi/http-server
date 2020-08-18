@@ -353,3 +353,7 @@ CTestTestfile.cmake
 _deps
 out/
 build/
+
+# VCPKG
+
+vcpkg/

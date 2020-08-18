@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include "server.h"
 
-static int print_usage(const char* prog) {
-	return fprintf(stderr,
+static void usage(const char* prog) {
+	fprintf(stderr,
 		"Usage:  %s [option ...]\n" \
 		"\n" \
 		"The following options are recognized:\n" \
