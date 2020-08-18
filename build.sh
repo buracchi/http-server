@@ -4,9 +4,9 @@
 # This file is just an utility and it is not necessary to the project.
 #
 
-git clone https://github.com/microsoft/vcpkg
-./vcpkg/bootstrap-vcpkg.sh
-./vcpkg/vcpkg install libjpeg-turbo
+git clone https://github.com/microsoft/vcpkg .vcpkg
+./.vcpkg/bootstrap-vcpkg.sh
+./.vcpkg/vcpkg install libjpeg-turbo
 
 mkdir -p build
 cd build
