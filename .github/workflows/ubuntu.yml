@@ -23,19 +23,19 @@ jobs:
     - uses: actions/cache@v2.1.0
       id: vcpkg-cache
       with:
-        path: vcpkg
+        path: .vcpkg
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg/info/*.list') }}
         restore-keys: ${{ runner.os }}-vcpkg-
 
     - name: install vcpkg
       if: steps.vcpkg-cache.outputs.cache-hit != 'true'
       run: |
-        git clone https://github.com/microsoft/vcpkg
-        ./vcpkg/bootstrap-vcpkg.sh
+        git clone https://github.com/microsoft/vcpkg .vcpkg
+        ./.vcpkg/bootstrap-vcpkg.sh
 
     - name: install dependencies
       if: steps.vcpkg-cache.outputs.cache-hit != 'true'
-      run: ./vcpkg/vcpkg install libjpeg-turbo
+      run: ./.vcpkg/vcpkg install libjpeg-turbo
 
     - name: configure
       run: |
