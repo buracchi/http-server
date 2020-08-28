@@ -49,6 +49,10 @@ endif()
 
 find_package(JPEG)
 
+# Resource
+
+add_definitions(-DRESOURCES_PATH="${CMAKE_HOME_DIRECTORY}/res")
+
 # Source
 
 add_subdirectory(src)
