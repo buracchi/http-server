@@ -5,20 +5,27 @@
 #include <string.h>
 #include <jpeglib.h>
 
-static void compress(const char* out_filename, const int quality);
-static void decompress(const char* in_filename);
+static struct image {
+    int height;
+    int width;
+    int components;
+    J_COLOR_SPACE color_space;
+    JSAMPLE* buffer;
+};
+
+static void compress(struct image* image, const char* out_filename, const int quality);
+static struct image* decompress(const char* in_filename);
 
 int print_image() {
-    decompress(RESOURCES_PATH "/images/800px-Felis_silvestris_silvestris.jpg");
-    compress(RESOURCES_PATH "/images/output.jpg", 1);
+    struct image* image;
+    image = decompress(RESOURCES_PATH "/images/800px-Felis_silvestris_silvestris.jpg");
+    compress(image, RESOURCES_PATH "/images/output.jpg", 1);
+    free(image->buffer);
+    free(image);
 	return printf("Image!\n");
 }
 
-JSAMPLE* image_buffer = NULL;			/* Points to large array of R,G,B-order data */
-int image_height;						/* Number of rows in image */
-int image_width;						/* Number of columns in image */
-
-static void compress(const char* out_filename, const int quality) {
+static void compress(struct image* image, const char* out_filename, const int quality) {
 
 	/* Allocate and initialize JPEG compression object */
 
@@ -38,12 +45,12 @@ static void compress(const char* out_filename, const int quality) {
 
 	/* Set parameters for compression */
 
-	cinfo.image_width = image_width;		/* Image width and height, in pixels */
-	cinfo.image_height = image_height;
-	cinfo.input_components = 3;				/* Number of color components per pixel */
-	cinfo.in_color_space = JCS_RGB;			/* Colorspace of input image */
-	jpeg_set_defaults(&cinfo);				/* Use the library's routine to set default compression parameters. */
-	jpeg_set_quality(&cinfo, quality, TRUE /* limit to baseline-JPEG values */);
+	cinfo.image_width = image->width;		    /* Image width and height, in pixels */
+	cinfo.image_height = image->height;
+	cinfo.input_components = image->components; /* Number of color components per pixel */
+	cinfo.in_color_space = image->color_space;  /* Colorspace of input image */
+	jpeg_set_defaults(&cinfo);				    /* Use the library's routine to set default compression parameters. */
+	jpeg_set_quality(&cinfo, quality, TRUE      /* limit to baseline-JPEG values */);
 
 	/* Start compressor */
 
@@ -54,10 +61,10 @@ static void compress(const char* out_filename, const int quality) {
 	JSAMPROW row_pointer[1];				/* pointer to JSAMPLE row[s] */
     int row_stride;                         /* physical row width in image buffer */
 
-	row_stride = image_width * 3;			/* JSAMPLEs per row in image_buffer (RGB) */
+	row_stride = image->width * 3;			/* JSAMPLEs per row in image_buffer (RGB) */
 
     while (cinfo.next_scanline < cinfo.image_height) {
-        row_pointer[0] = &image_buffer[cinfo.next_scanline * row_stride];
+        row_pointer[0] = &(image->buffer)[cinfo.next_scanline * row_stride];
         (void)jpeg_write_scanlines(&cinfo, row_pointer, 1);
     }
 
@@ -72,7 +79,12 @@ static void compress(const char* out_filename, const int quality) {
 
 }
 
-static void decompress(const char* in_filename) {
+static struct image* decompress(const char* in_filename) {
+
+    /* Allocate and initialize return image */
+
+    struct image* result;
+    result = malloc(sizeof(struct image));
 
     /* Allocate and initialize JPEG decompression object */
 
@@ -109,13 +121,24 @@ static void decompress(const char* in_filename) {
     
     /* Deompress */
 
-    image_width = cinfo.output_width;
-    image_height = cinfo.output_height;
-    image_buffer = (JSAMPLE*)malloc(sizeof(JSAMPLE) * cinfo.output_components * image_width * image_height + 1);
+    result->width = cinfo.output_width;
+    result->height = cinfo.output_height;
+    result->components = cinfo.output_components;
+    result->color_space = cinfo.out_color_space;
+    result->buffer = (JSAMPLE*)malloc(
+        sizeof(JSAMPLE) *
+        cinfo.output_components *
+        cinfo.output_width *
+        cinfo.output_height
+    );
 
     while (cinfo.output_scanline < cinfo.output_height) {
         (void)jpeg_read_scanlines(&cinfo, buffer, 1);
-        memcpy(&image_buffer[(cinfo.output_scanline - 1) * row_stride], buffer[0], row_stride);
+        memcpy(
+            &(result->buffer)[(cinfo.output_scanline - 1) * row_stride],
+            buffer[0],
+            row_stride
+        );
     }
 
     /* Finish compression */
@@ -127,4 +150,5 @@ static void decompress(const char* in_filename) {
 
     jpeg_destroy_decompress(&cinfo);
    
+    return result;
 }
