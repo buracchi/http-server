@@ -5,7 +5,7 @@
 #include <string.h>
 #include <jpeglib.h>
 
-static struct image {
+struct image {
     int height;
     int width;
     int components;
@@ -13,19 +13,34 @@ static struct image {
     JSAMPLE* buffer;
 };
 
-static void compress(struct image* image, const char* out_filename, const int quality);
-static struct image* decompress(const char* in_filename);
+struct jpeg_property {
+    void (*jpeg_set_property)(j_compress_ptr, void*);
+    void* arg;
+};
 
-int print_image() {
+static struct image* decompress(const char*);
+static void compress(struct image*, const char*, const struct jpeg_property*);
+static void jpeg_set_property_quality(j_compress_ptr, void*);
+
+extern int print_image() {
     struct image* image;
     image = decompress(RESOURCES_PATH "/images/800px-Felis_silvestris_silvestris.jpg");
-    compress(image, RESOURCES_PATH "/images/output.jpg", 1);
+    struct jpeg_property* property = (struct jpeg_property*) malloc(sizeof(struct jpeg_property) * 2);
+    property[0].jpeg_set_property = jpeg_set_property_quality;
+    property[0].arg = (void*)5;
+    property[1].jpeg_set_property = NULL;
+    compress(image, RESOURCES_PATH "/images/output.jpg", property);
+    free(property);
     free(image->buffer);
     free(image);
 	return printf("Image!\n");
 }
 
-static void compress(struct image* image, const char* out_filename, const int quality) {
+static void jpeg_set_property_quality(j_compress_ptr cinfo, void* quality) {
+    jpeg_set_quality(cinfo, (int)(long)quality, TRUE);
+}
+
+static void compress(struct image* image, const char* out_filename, const struct jpeg_property* property) {
 
 	/* Allocate and initialize JPEG compression object */
 
@@ -50,7 +65,12 @@ static void compress(struct image* image, const char* out_filename, const int qu
 	cinfo.input_components = image->components; /* Number of color components per pixel */
 	cinfo.in_color_space = image->color_space;  /* Colorspace of input image */
 	jpeg_set_defaults(&cinfo);				    /* Use the library's routine to set default compression parameters. */
-	jpeg_set_quality(&cinfo, quality, TRUE      /* limit to baseline-JPEG values */);
+
+    while (property->jpeg_set_property) {
+        property->jpeg_set_property(&cinfo, property->arg);
+        property++;
+    }
+	//jpeg_set_quality(&cinfo, quality, TRUE      /* limit to baseline-JPEG values */);
 
 	/* Start compressor */
 

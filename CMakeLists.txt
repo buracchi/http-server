@@ -47,7 +47,7 @@ endif()
 
 # External library
 
-find_package(JPEG)
+find_package(JPEG REQUIRED)
 
 # Resource
 
