@@ -12,7 +12,7 @@ int server();
 int client();
 
 int main() {
-	int child_retval;
+	int client_status = 0;
 	pid_t pid;
 	pid = fork();
 	if (pid == -1) {
@@ -22,7 +22,13 @@ int main() {
 		return client();
 	}
 	server();
-	assert_neq(wait(&child_retval), -1);
+	assert_neq(wait(&client_status), -1);
+	if (WIFEXITED(client_status)) {
+		assert_neq(WEXITSTATUS(client_status), EXIT_FAILURE);
+	}
+	else {
+		return EXIT_FAILURE;
+	}
 	return EXIT_SUCCESS;
 }
 
