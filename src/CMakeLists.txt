@@ -2,6 +2,7 @@
 
 add_subdirectory(server)
 add_subdirectory(image)
+add_subdirectory(connection)
 
 add_executable (
 	http-server

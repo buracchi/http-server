@@ -1,4 +1,4 @@
-#include <tcp_connection.h>
+#include <connection.h>
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -18,16 +18,16 @@
 #define BACKLOG 1024
 #define MSG_LEN 1024
 
-struct tcp_connection {
+struct connection {
 	int socket;
 	struct sockaddr* addr;
 	socklen_t addrlen;
 };
 
 
-tcp_connection_t tcp_connection_init(const char* address, const uint16_t port) {
-	struct tcp_connection* connection;
-	if ((connection = malloc(sizeof(struct tcp_connection))) == NULL) {
+connection_t connection_init(const char* address, const uint16_t port) {
+	struct connection* connection;
+	if ((connection = malloc(sizeof(struct connection))) == NULL) {
 		// TODO: set errno
 		return NULL;
 	}
@@ -58,27 +58,48 @@ tcp_connection_t tcp_connection_init(const char* address, const uint16_t port) {
 	return connection;
 }
 
-int tcp_connection_destroy(const tcp_connection_t handle) {
-	struct tcp_connection* connection;
-	connection = (struct tcp_connection*)handle;
+int connection_destroy(const connection_t handle) {
+	struct connection* connection;
+	connection = (struct connection*)handle;
 	free(connection->addr);
 	free(connection);
 	return 0;
 }
 
-int tcp_connection_close(const tcp_connection_t handle) {
-	struct tcp_connection* connection;
-	connection = (struct tcp_connection*)handle;
+int connection_listen(const connection_t handle) {
+	struct connection* connection;
+	connection = (struct connection*)handle;
+	if (bind(connection->socket, connection->addr, connection->addrlen) == -1) {
+		return -1;
+	}
+	if (listen(connection->socket, BACKLOG) == -1) {
+		return -1;
+	}
+	return 0;
+}
+
+int connection_connect(const connection_t handle) {
+	struct connection* connection;
+	connection = (struct connection*)handle;
+	if (connect(connection->socket, connection->addr, connection->addrlen) == SOCKET_ERROR) {
+		return -1;
+	}
+	return 0;
+}
+
+int connection_close(const connection_t handle) {
+	struct connection* connection;
+	connection = (struct connection*)handle;
 	if (close(connection->socket) == -1) {
 		return -1;
 	}
 	return 0;
 }
 
-int tcp_connection_recv(const tcp_connection_t handle, char** buff) {
-	struct tcp_connection* connection;
+int connection_recv(const connection_t handle, char** buff) {
+	struct connection* connection;
 	ssize_t len;
-	connection = (struct tcp_connection*)handle;
+	connection = (struct connection*)handle;
 	if ((*buff = malloc(sizeof(char) * (MSG_LEN + 1))) == NULL) {
 		return -1;
 	}
@@ -92,42 +113,21 @@ int tcp_connection_recv(const tcp_connection_t handle, char** buff) {
 	return (int)len;
 }
 
-int tcp_connection_send(const tcp_connection_t handle, const char* buff) {
-	struct tcp_connection* connection;
+int connection_send(const connection_t handle, const char* buff) {
+	struct connection* connection;
 	int len;
-	connection = (struct tcp_connection*)handle;
+	connection = (struct connection*)handle;
 	if ((len = (int)send(connection->socket, buff, strlen(buff), 0)) == -1) {
 		return -1;
 	}
 	return len;
 }
 
-int tcp_connetcion_connect(const tcp_connection_t handle) {
-	struct tcp_connection* connection;
-	connection = (struct tcp_connection*)handle;
-	if (connect(connection->socket, connection->addr, connection->addrlen) == SOCKET_ERROR) {
-		return -1;
-	}
-	return 0;
-}
-
-int tcp_connection_listen(const tcp_connection_t handle) {
-	struct tcp_connection* connection;
-	connection = (struct tcp_connection*)handle;
-	if (bind(connection->socket, connection->addr, connection->addrlen) == -1) {
-		return -1;
-	}
-	if (listen(connection->socket, BACKLOG) == -1) {
-		return -1;
-	}
-	return 0;
-}
-
-tcp_connection_t tcp_connection_accepted(const tcp_connection_t handle) {
-	struct tcp_connection* listener;
-	struct tcp_connection* accepted;
-	listener = (struct tcp_connection*)handle;
-	if ((accepted = malloc(sizeof(struct tcp_connection))) == NULL) {
+connection_t connection_accepted(const connection_t handle) {
+	struct connection* listener;
+	struct connection* accepted;
+	listener = (struct connection*)handle;
+	if ((accepted = malloc(sizeof(struct connection))) == NULL) {
 		return NULL;
 	}
 	memset(&accepted->addrlen, 0, sizeof(socklen_t));
