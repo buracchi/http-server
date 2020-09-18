@@ -1,4 +1,5 @@
 #include <stdlib.h>
+
 #include "image.h"
 
 int main() {
