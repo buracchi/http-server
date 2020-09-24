@@ -24,7 +24,6 @@ struct connection {
 	socklen_t addrlen;
 };
 
-
 connection_t connection_init(const char* address, const uint16_t port) {
 	struct connection* connection;
 	if ((connection = malloc(sizeof(struct connection))) == NULL) {
@@ -33,7 +32,8 @@ connection_t connection_init(const char* address, const uint16_t port) {
 	}
 	struct sockaddr_in* paddr_in;
 	struct in_addr host_addr;
-	if ((connection->socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
+	connection->socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (connection->socket == INVALID_SOCKET) {
 		// TODO: set errno
 		free(connection);
 		return NULL;
@@ -80,8 +80,10 @@ int connection_listen(const connection_t handle) {
 
 int connection_connect(const connection_t handle) {
 	struct connection* connection;
+	int ret;
 	connection = (struct connection*)handle;
-	if (connect(connection->socket, connection->addr, connection->addrlen) == SOCKET_ERROR) {
+	ret = connect(connection->socket, connection->addr, connection->addrlen);
+	if (ret == SOCKET_ERROR) {
 		return -1;
 	}
 	return 0;

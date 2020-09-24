@@ -11,7 +11,7 @@ int server();
 int client();
 
 int main() {
-	int client_status = 0;
+	int cstatus = 0;
 	pid_t pid;
 	pid = fork();
 	if (pid == -1) {
@@ -21,9 +21,9 @@ int main() {
 		return client();
 	}
 	server();
-	assert_neq(wait(&client_status), -1);
-	if (WIFEXITED(client_status)) {
-		assert_neq(WEXITSTATUS(client_status), EXIT_FAILURE);
+	assert_neq(wait(&cstatus), -1);
+	if (WIFEXITED(cstatus)) {
+		assert_neq(WEXITSTATUS(cstatus), EXIT_FAILURE);
 	}
 	else {
 		return EXIT_FAILURE;
@@ -31,29 +31,28 @@ int main() {
 	return EXIT_SUCCESS;
 }
 
-
 int server() {
-	connection_t listening_connection;
-	connection_t accepted_connection;
+	connection_t list_con;
+	connection_t acpt_con;
 	char* buff;
-	assert_neq(listening_connection = connection_init("127.0.0.1", 1234), NULL);
-	assert_neq(connection_listen(listening_connection), -1);
-	assert_neq(accepted_connection = connection_accepted(listening_connection), NULL);
-	assert_neq(connection_recv(accepted_connection, &buff), -1);
-	assert_neq(connection_close(accepted_connection), -1);
-	assert_neq(connection_close(listening_connection), -1);
-	connection_destroy(accepted_connection);
-	connection_destroy(listening_connection);
+	assert_neq(list_con = connection_init("127.0.0.1", 1234), NULL);
+	assert_neq(connection_listen(list_con), -1);
+	assert_neq(acpt_con = connection_accepted(list_con), NULL);
+	assert_neq(connection_recv(acpt_con, &buff), -1);
+	assert_neq(connection_close(acpt_con), -1);
+	assert_neq(connection_close(list_con), -1);
+	connection_destroy(acpt_con);
+	connection_destroy(list_con);
 	free(buff);
 	return EXIT_SUCCESS;
 }
 
 int client() {
-	connection_t connection;
-	assert_neq(connection = connection_init("127.0.0.1", 1234), NULL);
-	assert_neq(connection_connect(connection), -1);
-	assert_neq(connection_send(connection, "Message\n"), -1);
-	assert_neq(connection_close(connection), -1);
-	connection_destroy(connection);
+	connection_t con;
+	assert_neq(con = connection_init("127.0.0.1", 1234), NULL);
+	assert_neq(connection_connect(con), -1);
+	assert_neq(connection_send(con, "Message\n"), -1);
+	assert_neq(connection_close(con), -1);
+	connection_destroy(con);
 	return EXIT_SUCCESS;
 }
