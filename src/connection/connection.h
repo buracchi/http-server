@@ -17,6 +17,14 @@ typedef void* connection_t;
 extern connection_t connection_init(const char* address, const uint16_t port);
 
 /*
+* Destroy a connection object.
+*
+* @param	connection
+* @return
+*/
+extern int connection_destroy(const connection_t connection);
+
+/*
 * Connect an initialized connection.
 * 
 * @param	connection
@@ -65,11 +73,3 @@ extern int connection_send(const connection_t connection, const char* buff);
 * @return	1 and set properly errno on error
 */
 extern int connection_close(const connection_t connection);
-
-/*
-* Destroy a connection object.
-*
-* @param	connection
-* @return
-*/
-extern int connection_destroy(const connection_t connection);

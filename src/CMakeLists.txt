@@ -3,7 +3,8 @@
 add_subdirectory(server)
 add_subdirectory(image)
 add_subdirectory(connection)
-add_subdirectory(abnf-parser)
+add_subdirectory(abnf)
+add_subdirectory(uri)
 
 add_executable (
 	http-server
