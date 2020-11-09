@@ -11,27 +11,25 @@ on:
 env:
   CTEST_OUTPUT_ON_FAILURE: 1
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-  BUILD_TYPE: Release
+  BUILD_TYPE: Debug
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v2.3.4
       with:
-        submodules: 'recursive'
+        submodules: 'false'
     
-    - uses: actions/cache@v2.1.0
+    - uses: actions/cache@v2.1.3
       id: vcpkg-cache
       with:
-        path: vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg/info/*.list') }}
-        restore-keys: ${{ runner.os }}-vcpkg-
-
-    - name: install vcpkg
-      if: steps.vcpkg-cache.outputs.cache-hit != 'true'
-      run: ./vcpkg/bootstrap-vcpkg.sh
+        path: ${{runner.workspace}}/vcpkg
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/dependencies.vcpkg') }}
+        restore-keys: |
+            ${{ runner.os }}-vcpkg-
+            ${{ runner.os }}-
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
@@ -52,7 +50,7 @@ jobs:
       run: ctest -C $BUILD_TYPE
 
     - name: Codecov
-      uses: codecov/codecov-action@v1.0.12
+      uses: codecov/codecov-action@v1.0.14
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true

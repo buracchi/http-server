@@ -24,6 +24,19 @@ if(NOT EXISTS "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake")
     message(FATAL_ERROR "The vcpkg submodules was not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
+if(NOT EXISTS "${VCPKG_DIR}/vcpkg" OR NOT EXISTS "${VCPKG_DIR}/vcpkg.exe")
+    if (${UNIX})
+        set(FORMAT "sh")
+    elseif(${WIN32})
+        set(FORMAT "bat")
+    else()
+        message(FATAL_ERROR "Vcpkg cannot be insalled in this operating system.")
+    endif()
+    exec_program(
+        ${VCPKG_DIR}/bootstrap-vcpkg.${FORMAT} ${VCPKG_DIR}
+    )
+endif()
+
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_TOOLCHAIN_FILE
         "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake"
