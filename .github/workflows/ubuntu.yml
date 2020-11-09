@@ -11,10 +11,10 @@ on:
 env:
   CTEST_OUTPUT_ON_FAILURE: 1
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  BUILD_TYPE: Release
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     
     steps:
@@ -23,32 +23,35 @@ jobs:
     - uses: actions/cache@v2.1.0
       id: vcpkg-cache
       with:
-        path: .vcpkg
+        path: vcpkg
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg/info/*.list') }}
         restore-keys: ${{ runner.os }}-vcpkg-
 
     - name: install vcpkg
       if: steps.vcpkg-cache.outputs.cache-hit != 'true'
-      run: |
-        git clone https://github.com/microsoft/vcpkg .vcpkg
-        ./.vcpkg/bootstrap-vcpkg.sh
+      run: ./vcpkg/bootstrap-vcpkg.sh
 
     - name: install dependencies
       if: steps.vcpkg-cache.outputs.cache-hit != 'true'
-      run: ./.vcpkg/vcpkg install libjpeg-turbo
+      run: ./vcpkg/vcpkg install libjpeg-turbo
 
-    - name: configure
-      run: |
-        mkdir -p build
-        cd build
-        cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ..
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
 
-    - name: build
-      run: cmake --build build --config Debug -j $(nproc)
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE
 
-    - name: test
-      working-directory: build
-      run: ctest -j $(nproc) --output-on-failure
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: ctest -C $BUILD_TYPE
 
     - name: Codecov
       uses: codecov/codecov-action@v1.0.12
