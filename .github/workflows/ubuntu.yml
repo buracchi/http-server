@@ -33,10 +33,6 @@ jobs:
       if: steps.vcpkg-cache.outputs.cache-hit != 'true'
       run: ./vcpkg/bootstrap-vcpkg.sh
 
-    - name: install dependencies
-      if: steps.vcpkg-cache.outputs.cache-hit != 'true'
-      run: ./vcpkg/vcpkg install libjpeg-turbo
-
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
 

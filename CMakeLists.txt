@@ -3,7 +3,7 @@
 # Submodules Configuration
 
 find_package(Git QUIET)
-if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+if(GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
     option(GIT_SUBMODULE "Check submodules during build" ON)
     if(GIT_SUBMODULE)
         message(STATUS "Submodule update")
@@ -18,14 +18,26 @@ endif()
 
 # Vcpkg Configuration
 
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake")
+set(VCPKG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg")
+
+if(NOT EXISTS "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake")
     message(FATAL_ERROR "The vcpkg submodules was not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-  set(CMAKE_TOOLCHAIN_FILE "${PROJECT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake"
-      CACHE STRING "")
+    set(CMAKE_TOOLCHAIN_FILE
+        "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake"
+        CACHE STRING ""
+    )
 endif()
+
+file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/dependencies.vcpkg DEPENDENCY_LIST)
+foreach(DEPENDENCY IN LISTS DEPENDENCY_LIST)
+    exec_program(
+        ${VCPKG_DIR}/vcpkg  ${VCPKG_DIR}
+        ARGS "install ${DEPENDENCY}"
+    )
+endforeach()
 
 # Project Configuration
 
@@ -70,7 +82,7 @@ if(CODE_COVERAGE AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 
-# External library
+# Dependencies
 
 find_package(JPEG REQUIRED)
 
