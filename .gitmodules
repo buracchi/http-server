@@ -1,0 +1,4 @@
+[submodule "vcpkg"]
+	path = vcpkg
+	url = ../../microsoft/vcpkg.git
+	branch = origin/master
