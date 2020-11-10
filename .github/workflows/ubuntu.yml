@@ -31,8 +31,11 @@ jobs:
             ${{ runner.os }}-vcpkg-
             ${{ runner.os }}-
 
+    - name: Setup Debug Session
+      uses: csexton/debugger-action@master
+
     - name: Create Build Environment
-      run: ls vcpkg -al; cmake -E make_directory ${{runner.workspace}}/build
+      run: cmake -E make_directory ${{runner.workspace}}/build
 
     - name: Configure CMake
       shell: bash
