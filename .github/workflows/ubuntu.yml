@@ -32,7 +32,7 @@ jobs:
             ${{ runner.os }}-
 
     - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/build
+      run: cmake -S $GITHUB_WORKSPACE -B ${{runner.workspace}}/build
 
     - name: Configure CMake
       shell: bash
