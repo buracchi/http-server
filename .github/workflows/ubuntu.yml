@@ -19,8 +19,6 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2.3.4
-      with:
-        submodules: 'recursive'
     
     - uses: actions/cache@v2.1.3
       id: vcpkg-cache
