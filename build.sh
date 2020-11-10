@@ -4,6 +4,5 @@
 # This file is just an utility and it is not necessary to the project.
 #
 
-mkdir build
 cmake -S . -B build
 cmake --build build -j $(nproc)
