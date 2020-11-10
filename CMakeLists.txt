@@ -24,7 +24,7 @@ if(NOT EXISTS "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake")
     message(FATAL_ERROR "The vcpkg submodules was not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
-if(NOT EXISTS "${VCPKG_DIR}/vcpkg" OR NOT EXISTS "${VCPKG_DIR}/vcpkg.exe")
+if(NOT EXISTS "${VCPKG_DIR}/vcpkg" AND NOT EXISTS "${VCPKG_DIR}/vcpkg.exe")
     if (${UNIX})
         set(FORMAT "sh")
     elseif(${WIN32})
