@@ -44,7 +44,7 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     )
 endif()
 
-file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/dependencies.vcpkg DEPENDENCY_LIST)
+file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/.dependencies DEPENDENCY_LIST)
 foreach(DEPENDENCY IN LISTS DEPENDENCY_LIST)
     exec_program(
         ${VCPKG_DIR}/vcpkg  ${VCPKG_DIR}
