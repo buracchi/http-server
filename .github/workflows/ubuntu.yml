@@ -32,7 +32,7 @@ jobs:
             ${{ runner.os }}-
 
     - name: Create Build Environment
-      run: ls -al; cmake -E make_directory ${{runner.workspace}}/build
+      run: ls vcpkg -al; cmake -E make_directory ${{runner.workspace}}/build
 
     - name: Configure CMake
       shell: bash
